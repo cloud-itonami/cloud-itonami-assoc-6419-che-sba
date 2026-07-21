@@ -1,0 +1,48 @@
+(ns association-facts
+  (:export [main association-covered? entry-count entry-field topic-count topic by-topic-count by-topic-id]))
+(defn association-covered? [a :string] :i64 (string=? a "sba"))
+(defn entry-count [a :string] :i64 (if (association-covered? a) 2 0))
+(defn valid-entry? [a :string i :i64] :i64
+  (if (association-covered? a) (if (= i 0) 1 (if (= i 1) 1 0)) 0))
+(defn entry-field [a :string i :i64 f :string] [:option :string]
+  (if (valid-entry? a i)
+    (if (= i 0)
+      (cond
+        (string=? f "id") (option-some-of [:option :string] "sba.founding-1912-basel")
+        (string=? f "title") (option-some-of [:option :string] "Swiss Bankers Association founded in Basel (Wikipedia)")
+        (string=? f "association") (option-some-of [:option :string] "sba")
+        (string=? f "isic") (option-some-of [:option :string] "6419")
+        (string=? f "country") (option-some-of [:option :string] "CHE")
+        (string=? f "kind") (option-some-of [:option :string] "governance-program")
+        (string=? f "url") (option-some-of [:option :string] "https://en.wikipedia.org/wiki/Swiss_Bankers_Association")
+        (string=? f "url-provenance") (option-some-of [:option :string] "wikipedia-corroborated")
+        (string=? f "established-date") (option-some-of [:option :string] "1912")
+        (string=? f "retrieved-at") (option-some-of [:option :string] "2026-07-17")
+        :else (option-none-of [:option :string]))
+      (cond
+        (string=? f "id") (option-some-of [:option :string] "sba.cdb-20-2020-due-diligence-code")
+        (string=? f "title") (option-some-of [:option :string] "Agreement on the Swiss banks' code of conduct with regard to the exercise of due diligence (CDB 20)")
+        (string=? f "association") (option-some-of [:option :string] "sba")
+        (string=? f "isic") (option-some-of [:option :string] "6419")
+        (string=? f "country") (option-some-of [:option :string] "CHE")
+        (string=? f "kind") (option-some-of [:option :string] "governance-program")
+        (string=? f "url") (option-some-of [:option :string] "https://www.swissbanking.ch/_Resources/Persistent/6/2/e/e/62eec3df0685e359c5a376dfca79dec8b908ea9c/SBA_Agreement_CDB_2020_EN.pdf")
+        (string=? f "url-provenance") (option-some-of [:option :string] "official-swissbanking-ch")
+        (string=? f "established-date") (option-some-of [:option :string] "2020")
+        (string=? f "retrieved-at") (option-some-of [:option :string] "2026-07-17")
+        :else (option-none-of [:option :string])))
+    (option-none-of [:option :string])))
+(defn topic-count [a :string i :i64] :i64 (if (valid-entry? a i) 1 0))
+(defn topic [a :string i :i64 ti :i64] [:option :string]
+  (if (valid-entry? a i)
+    (if (= ti 0) (option-some-of [:option :string] "governance") (option-none-of [:option :string]))
+    (option-none-of [:option :string])))
+(defn by-topic-count [a :string t :string] :i64
+  (if (association-covered? a) (if (string=? t "governance") 2 0) 0))
+(defn by-topic-id [a :string t :string i :i64] [:option :string]
+  (if (association-covered? a)
+    (if (string=? t "governance")
+      (if (= i 0) (entry-field a 0 "id") (if (= i 1) (entry-field a 1 "id") (option-none-of [:option :string])))
+      (option-none-of [:option :string]))
+    (option-none-of [:option :string])))
+(defn main [] :i64 0)
